@@ -253,24 +253,29 @@
             <li>Open a terminal inside the project.</li>
             <li>First of all if you don't have python in your device follow this steps.</li>
             <li>(For WINDOWS)</li>
-            <li>Install python: <code>winget install -e --id Python.Python.3.12</code></li>
-            <li>After install python check if installed: <code>python --version</code></li>
-            <li></li>
+            <ul>
+              <li>Install python: <code>winget install -e --id Python.Python.3.12</code></li>
+              <li>After install python check if installed: <code>python --version</code></li>
+            </ul>
             <li>(For MAC)</li>
-            <li>Install python: <code>brew install python</code></li>
-            <li></li>
-            <li>If you don't have brew install it before installing python: <code>/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</code></li>
-            <li>After install python check if installed: <code>python3 --version</code></li>
-            <li></li>
+            <ul>
+              <li>If you don't have brew install it before installing python: <code>/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</code></li>
+              <li>Install python: <code>brew install python</code></li>
+              <li>After install python check if installed: <code>python3 --version</code></li>
+            </ul>
             <li>THAN (Optional)</li>
             <li>(For WINDOWS)</li>
-            <li>Create a virtual environment: <code>py -3 -m venv .venv</code></li>
-            <li>(If you use PowerShell)</li>
-            <li><code>.\.venv\Scripts\Activate.ps1</code></li>
-            <li>(If you use CMD)</li>
-            <li><code>.\.venv\Scripts\activate.bat</code></li>
+            <ul>
+              <li>Create a virtual environment: <code>py -3 -m venv .venv</code></li>
+              <li>(If you use PowerShell)</li>
+              <li><code>.\.venv\Scripts\Activate.ps1</code></li>
+              <li>(If you use CMD)</li>
+              <li><code>.\.venv\Scripts\activate.bat</code></li>
+            </ul>
             <li>(For MAC)</li>
-            <li>Create a virtual environment: <code>python3 -m venv env && source env/bin/activate</code></li>
+            <ul>
+              <li>Create a virtual environment: <code>python3 -m venv env && source env/bin/activate</code></li>
+            </ul>
             <li>THAN</li>
             <li>Install requirements: <code>pip install -r requirements.txt</code></li>
             <li>Run the local server: <code>python serve.py</code></li>
