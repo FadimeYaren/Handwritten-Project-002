@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EMNIST Digits – Training Dashboard</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.1/dist/chartjs-chart-matrix.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+
+  <!-- Fonts & Chart libs -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Matrix plugin MUST load before our script -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.1/dist/chartjs-chart-matrix.min.js"></script>
+
+  <style>
+    .btn-local{
+      display:inline-block;
+      background:var(--accent);
+      color:var(--bg);
+      font-weight:700;
+      padding:12px 18px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.12);
+      box-shadow:0 10px 24px rgba(0,0,0,.35);
+      text-decoration:none;
+      transition:transform .15s ease, box-shadow .15s ease, opacity .2s ease;
+    }
+    .btn-local:hover{
+      transform:translateY(-1px);
+      box-shadow:0 14px 28px rgba(0,0,0,.4);
+      opacity:.95;
+    }
+    .btn-local:active{
+      transform:translateY(0);
+      box-shadow:0 8px 18px rgba(0,0,0,.32);
+    }
+
+
+
+    :root {
+    --bg:#0b0c10; 
+    --panel:#111317; 
+    --muted:#aab0bf; 
+    --fg:#eaf0ff; 
+    --accent:#7aa2ff;
+  }
+
+    /* 🌗 Tema renkleri */
+    body.theme-dark {
+      --bg:#0b0c10;
+      --panel:#111317;
+      --fg:#eaf0ff;
+      --muted:#aab0bf;
+      --accent:#7aa2ff;
+    }
+    body.theme-sunset {
+      --bg:#1b0d0d;
+      --panel:#2a1515;
+      --fg:#ffeaea;
+      --muted:#cfa4a4;
+      --accent:#ff847c;
+    }
+    body.theme-ocean {
+      --bg:#001f3f;
+      --panel:#012a52;
+      --fg:#e1f4ff;
+      --muted:#a3c4d9;
+      --accent:#29b6f6;
+    }
+    body.theme-forest {
+      --bg:#0f1c12;
+      --panel:#182a1c;
+      --fg:#eaf7e3;
+      --muted:#a6bfa0;
+      --accent:#5de68a;
+    }
+    body.theme-light {
+      --bg:#f4f5f8;
+      --panel:#ffffff;
+      --fg:#1a1a1a;
+      --muted:#60656f;
+      --accent:#007acc;
+    }
+
+    /* Ortak stiller (mevcut kodunun altına ekle) */
+    *{box-sizing:border-box}
+    body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--fg); transition: background 0.5s ease, color 0.5s ease;}
+    header{position:sticky;top:0;background:linear-gradient(180deg,var(--bg) 0%,rgba(11,12,16,0.6) 100%);backdrop-filter: blur(8px); z-index:10;}
+    .wrap{max-width:1150px;margin:0 auto;padding:22px}
+    h1{margin:0 0 6px;font-weight:800;letter-spacing:.2px}
+    h2{margin:22px 0 12px}
+    p{margin:0 0 8px;color:var(--muted)}
+    .grid{display:grid;gap:18px}
+    .cards{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+    .row{display:grid;grid-template-columns:1.2fr 1fr;gap:18px}
+    .card{background:var(--panel);border:1px solid rgba(255,255,255,0.05);border-radius:18px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    .card h3{margin:0 0 10px;font-size:16px}
+    .muted{color:var(--muted);font-size:13px}
+    .legend{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
+    .legend span{width:16px;height:10px;border-radius:2px;display:inline-block}
+    img.rimg{width:100%;border-radius:12px;border:1px solid #222632}
+    .footer{margin:28px 0 40px;color:var(--muted);font-size:12px;text-align:center}
+    code{background:#0f1220;color:#cbd6ff;padding:2px 6px;border-radius:6px}
+    a{color:var(--accent);text-decoration:none}
+
+
+    :root { --bg:#0b0c10; --panel:#111317; --muted:#aab0bf; --fg:#eaf0ff; --accent:#7aa2ff; }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--fg)}
+    header{position:sticky;top:0;background:linear-gradient(180deg,#0b0c10 0%,rgba(11,12,16,0.6) 100%);backdrop-filter:blur(8px);z-index:10}
+    .wrap{max-width:1150px;margin:0 auto;padding:22px}
+    h1{margin:0 0 6px;font-weight:800;letter-spacing:.2px}
+    h2{margin:22px 0 12px}
+    p{margin:0 0 8px;color:var(--muted)}
+    .grid{display:grid;gap:18px}
+    .cards{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+    .row{display:grid;grid-template-columns:1.2fr 1fr;gap:18px}
+    .card{background:var(--panel);border:1px solid #1b1e27;border-radius:18px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    .card h3{margin:0 0 10px;font-size:16px}
+    .muted{color:var(--muted);font-size:13px}
+    .legend{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
+    .legend span{width:16px;height:10px;border-radius:2px;display:inline-block}
+    img.rimg{width:100%;border-radius:12px;border:1px solid #222632}
+    .footer{margin:28px 0 40px;color:#93a1b5;font-size:12px;text-align:center}
+    code{background:#0f1220;color:#cbd6ff;padding:2px 6px;border-radius:6px}
+    a{color:var(--accent);text-decoration:none}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>EMNIST Digits – Training Dashboard </h1>
+      <p>(Project002 Handwritten: Folder 002)</p>
+      <p class="muted">Static, client-side dashboard fed by <code>metrics.json</code>, confusion matrix and sample images exported from your PyTorch run.</p>
+    </div>
+
+    <!-- 🔘 Tema seçici -->
+    <div style="position:fixed;top:15px;right:25px;z-index:1000;">
+      <select id="themeSwitcher" style="background:var(--panel);color:var(--fg);border:1px solid var(--muted);border-radius:8px;padding:4px 8px;">
+        <option value="theme-dark">🌑 Dark</option>
+        <option value="theme-sunset">🌇 Sunset</option>
+        <option value="theme-ocean">🌊 Ocean</option>
+        <option value="theme-forest">🌿 Forest</option>
+        <option value="theme-light">☀️ Light</option>
+      </select>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="grid row">
+      <div class="card">
+        <h3>Training / Validation Curves</h3>
+        <canvas id="curveChart" height="190"></canvas>
+        <p class="muted" id="curveMeta"></p>
+      </div>
+      <div class="card">
+        <h3>Summary</h3>
+        <div id="summary" class="muted"></div>
+        <div style="height:10px"></div>
+        <h3>Class Counts</h3>
+        <canvas id="countChart" height="180"></canvas>
+      </div>
+    </div>
+
+    <div class="grid cards" style="margin-top:18px">
+      <div class="card">
+        <h3>Confusion Matrix</h3>
+        <canvas id="cmChart" height="420"></canvas>
+        <div class="legend"><span style="background:#0b2e66"></span> low <span style="background:#7aa2ff"></span> mid <span style="background:#b2c7ff"></span> high</div>
+        <p class="muted" id="cmHint" style="display:none;margin-top:8px">
+          Matrix plugin not available? Showing PNG fallback.
+        </p>
+      </div>
+      <div class="card">
+        <h3>Per-class Recall</h3>
+        <canvas id="perClassChart" height="220"></canvas>
+        <p class="muted">Derived from the confusion matrix (recall = TP / support).</p>
+      </div>
+      <div class="card">
+        <h3>Sample Batch (train)</h3>
+        <img id="sampleTrain" class="rimg" alt="sample train batch" />
+        <p class="muted">Written from <code>sample_train.png</code> exported by your script.</p>
+      </div>
+      <div class="card">
+        <h3>Sample Predictions (test)</h3>
+        <img id="samplePred" class="rimg" alt="sample predictions" />
+        <p class="muted">Generated as <code>sample_pred.png</code> to show model predictions (title: T=true, P=pred).</p>
+      </div>
+      <div class="card">
+        <h3>Wrong Examples (if any)</h3>
+        <img id="wrongExamples" class="rimg" alt="wrong examples" />
+        <p class="muted">Only visible if <code>wrong_examples.png</code> exists.</p>
+      </div>
+      <div class="card">
+        <h3>Hard Examples (low-confidence corrects)</h3>
+        <img id="hardExamples" class="rimg" alt="hard examples" />
+        <p class="muted">Correct predictions with confidence &lt; 0.60 (if available).</p>
+      </div>
+      <!-- 🧠 Manual Test Results Bölümü (tam genişlikte) -->
+      <div style="grid-column: 1 / -1; margin-top:50px;">
+        <div class="card" 
+            style="width:100%; background:var(--panel);
+                    border:1px solid rgba(255,255,255,0.05);
+                    border-radius:18px; padding:24px;
+                    box-shadow:0 10px 40px rgba(0,0,0,.35);
+                    text-align:center;">
+          <h2 style="font-size:22px; font-weight:700; margin-bottom:18px;">
+            📊 Manual Test Results
+          </h2>
+
+          <img src="./assets/manual_test_results.png"
+              alt="Manual Test Results"
+              style="width:100%; max-width:1100px; border-radius:16px;
+                      border:1px solid #222632;
+                      box-shadow:0 10px 30px rgba(0,0,0,.35);" />
+
+          <p class="muted" style="margin-top:12px; font-size:14px;">
+            When you run manual test in your local machine, be sure to make background black and the digits white color.
+          </p>
+          <p class="muted" style="margin-top:12px; font-size:14px;">
+            Result of manual test is 8/10 correct predictions.
+          </p>
+        </div>
+      </div>
+
+
+    </div>
+
+    <!-- 🧩 Local Setup Instructions -->
+    <div style="grid-column: 1 / -1; margin-top:60px;">
+      <div class="card"
+          style="width:100%; background:var(--panel); padding:24px; text-align:center;">
+        <h2 style="font-size:22px;">💻 Run It on Your Computer</h2>
+        <p class="muted" style="max-width:800px; margin:0 auto 18px;">
+          Want to try the trained model yourself? Download the project and start the local Flask server.
+        </p>
+
+        <a href="https://github.com/FadimeYaren/Handwritten-Project-002/archive/refs/heads/main.zip"
+          class="btn-local"
+          style="display:inline-block; background:var(--accent); color:#fff;
+                  padding:10px 20px; border-radius:8px; font-weight:600; text-decoration:none;">
+          ⬇️ Download Project (ZIP)
+        </a>
+
+        <div style="text-align:left; max-width:800px; margin:30px auto 0; font-size:14px; color:var(--muted); line-height:1.6;">
+          <ol>
+            <li>Unzip the folder.</li>
+            <li>Open a terminal inside the project.</li>
+            <li>(Optional) Create a virtual environment: <code>python3 -m venv env && source env/bin/activate</code></li>
+            <li>Install requirements: <code>pip install -r requirements.txt</code></li>
+            <li>Run the local server: <code>python serve.py</code></li>
+            <li>Return here and click the button below.</li>
+          </ol>
+        </div>
+
+        <a href="http://127.0.0.1:8000/test"
+          target="_blank"
+          rel="noopener noreferrer"
+          style="display:inline-block; background:var(--accent); color:#fff;
+                  padding:10px 20px; border-radius:8px; font-weight:600; text-decoration:none;">
+          🧪 Test on your local
+        </a>
+      </div>
+    </div>
+
+
+    <div class="footer">
+      <a href="https://github.com/FadimeYaren">© 2025 • Fadime Yaren Durmuş</a>
+    </div>
+  </main>
+
+  <script>
+
+    const select = document.getElementById('themeSwitcher');
+    const body = document.body;
+    // Kayıtlı tema varsa uygula
+    const saved = localStorage.getItem('dashboardTheme');
+    if(saved) {
+      body.className = saved;
+      select.value = saved;
+    } else {
+      body.className = 'theme-dark';
+    }
+
+    select.addEventListener('change', e=>{
+      body.className = e.target.value;
+      localStorage.setItem('dashboardTheme', e.target.value);
+    });
+
+
+    const ASSETS = './assets';
+
+    async function loadJSON(path){
+      const r = await fetch(path);
+      if(!r.ok) throw new Error('Failed '+path);
+      return r.json();
+    }
+
+    function makeCurveChart(ctx, metrics){
+      const epochs = metrics.epochs;
+      const trainLoss = metrics.train_loss;
+      const valLoss = metrics.val_loss;
+      const valAcc = metrics.val_acc.map(v=>v*100);
+      return new Chart(ctx,{
+        type:'line',
+        data:{
+          labels: epochs,
+          datasets:[
+            {label:'Train Loss', data:trainLoss, tension:.25},
+            {label:'Val Loss', data:valLoss, tension:.25},
+            {label:'Val Acc (%)', data:valAcc, yAxisID:'y1', tension:.25}
+          ]
+        },
+        options:{
+          responsive:true,
+          plugins:{legend:{labels:{color:'#dfe7ff'}}},
+          scales:{
+            x:{ticks:{color:'#9fb2d2'}, grid:{color:'#1d2330'}},
+            y:{ticks:{color:'#9fb2d2'}, grid:{color:'#1d2330'}, title:{display:true,text:'Loss',color:'#9fb2d2'}},
+            y1:{position:'right', ticks:{color:'#9fb2d2'}, grid:{drawOnChartArea:false}, title:{display:true,text:'Accuracy (%)',color:'#9fb2d2'}}
+          }
+        }
+      });
+    }
+
+    function makeCountsChart(ctx, counts){
+      const labels = Object.keys(counts);
+      const data = labels.map(k=>counts[k]);
+      return new Chart(ctx,{
+        type:'bar',
+        data:{labels, datasets:[{label:'Samples', data}]} ,
+        options:{plugins:{legend:{display:false}}, scales:{x:{ticks:{color:'#9fb2d2'}}, y:{ticks:{color:'#9fb2d2'}}}}
+      });
+    }
+
+    function makePerClassChart(ctx, metrics){
+      if(!metrics.per_class) return;
+      const labels = metrics.class_names;
+      const recall = metrics.per_class.recall.map(v=>v*100);
+      return new Chart(ctx,{
+        type:'bar',
+        data:{labels, datasets:[{label:'Recall (%)', data:recall}]},
+        options:{plugins:{legend:{display:false}}, scales:{x:{ticks:{color:'#9fb2d2'}}, y:{ticks:{color:'#9fb2d2'}}}}
+      });
+    }
+
+    function makeCMChart(ctx, cm){
+      if (!cm || !cm.length) throw new Error('Empty CM');
+      const n = cm.length;
+      const values = cm.flat();
+      const max = Math.max(...values);
+      const min = Math.min(...values);
+
+      const data = [];
+      for(let i=0;i<n;i++){
+        for(let j=0;j<n;j++){
+          data.push({x:j, y:i, v:cm[i][j]});
+        }
+      }
+
+      return new Chart(ctx,{
+        type:'matrix',
+        data:{ datasets:[{
+          label:'CM',
+          data,
+          parsing:{ xAxisKey:'x', yAxisKey:'y' },
+          width:  ({chart}) => (chart.chartArea.width  / n) - 2,
+          height: ({chart}) => (chart.chartArea.height / n) - 2,
+          backgroundColor: (c)=>{
+            const v = c.raw.v;
+            const t = (v - min) / (max - min + 1e-9);
+            const a = 0.25 + 0.75*t;
+            return `rgba(122,162,255,${a})`;
+          },
+          borderColor:'#0f1220', borderWidth:1,
+        }]},
+        options:{
+          plugins:{
+            legend:{display:false},
+            tooltip:{callbacks:{ label:(c)=>`(true=${c.raw.y}, pred=${c.raw.x}) = ${c.raw.v}`}},
+            // <<< SAYILARI HÜCRE ÜZERİNE YAZ >>>
+            datalabels:{
+              color:'#0b0c10',
+              font:{size: (ctx)=>{
+                // küçük matrislerde yazıyı biraz büyüt
+                const n = cm.length;
+                if (n <= 10) return 12;
+                if (n <= 26) return 10;
+                return 8;
+              }},
+              formatter:(val)=> val.v ? String(val.v) : '',
+              clamp:true,
+              align:'center',
+              anchor:'center'
+            }
+          },
+          scales:{
+            x:{type:'linear', min:-0.5, max:n-0.5, ticks:{stepSize:1, color:'#9fb2d2', callback:v=>v|0}, grid:{color:'#1d2330'}},
+            y:{type:'linear', min:-0.5, max:n-0.5, reverse:true, ticks:{stepSize:1, color:'#9fb2d2', callback:v=>v|0}, grid:{color:'#1d2330'}},
+          }
+        },
+        plugins:[ChartDataLabels] // datalabels’i aktif et
+      });
+    }
+
+    async function boot(){
+      // Load JSONs
+      const metrics = await loadJSON(`${ASSETS}/metrics.json`);
+      const counts  = await loadJSON(`${ASSETS}/class_counts.json`);
+
+      // Charts
+      makeCurveChart(document.getElementById('curveChart'), metrics);
+      document.getElementById('curveMeta').textContent =
+        `Best Val Acc: ${(Math.max(...metrics.val_acc)*100).toFixed(2)}% | Epochs: ${metrics.epochs.length}`;
+      makeCountsChart(document.getElementById('countChart'), counts.train);
+      makePerClassChart(document.getElementById('perClassChart'), metrics);
+
+      // Confusion Matrix with PNG fallback
+      try {
+        makeCMChart(document.getElementById('cmChart'), metrics.confusion_matrix);
+      } catch (e) {
+        console.error(e);
+        const canvas = document.getElementById('cmChart');
+        const img = new Image();
+        img.onload = ()=>{ canvas.replaceWith(img); img.className='rimg'; img.alt='Confusion Matrix'; };
+        img.onerror = ()=>{ document.getElementById('cmHint').style.display='block'; };
+        img.src = `${ASSETS}/cm_emnist_digits.png`;
+        document.getElementById('cmHint').style.display='block';
+      }
+
+      // Images (with graceful hide if missing)
+      const tImg = document.getElementById('sampleTrain');
+      tImg.src = `${ASSETS}/sample_train.png`;
+      tImg.onerror = ()=> tImg.style.display='none';
+
+      const pImg = document.getElementById('samplePred');
+      pImg.src = `${ASSETS}/sample_pred.png`;
+      pImg.onerror = ()=> pImg.style.display='none';
+
+      const wImg = document.getElementById('wrongExamples');
+      wImg.src = `${ASSETS}/wrong_examples.png`;
+      wImg.onerror = ()=> wImg.style.display='none';
+
+      const hImg = document.getElementById('hardExamples');
+      if (hImg) { hImg.src = `${ASSETS}/hard_examples.png`; hImg.onerror = ()=> hImg.style.display='none'; }
+
+
+      // Summary
+      const s = document.getElementById('summary');
+      s.innerHTML = `<div>Train size: <b>${counts.meta.train_size}</b> | Test size: <b>${counts.meta.test_size}</b></div>
+                     <div>Classes: <b>${metrics.class_names.join(', ')}</b></div>`;
+
+    }
+
+    boot().catch(e=>{
+      console.error(e);
+      alert('Failed to load assets. Did you place files under ./assets ?');
+    });
+  </script>
+</body>
+</html>

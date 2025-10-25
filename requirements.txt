@@ -1,0 +1,8 @@
+flask>=2.3
+flask-cors>=4.0
+torch>=2.2
+torchvision>=0.17
+pillow>=10.0
+numpy>=1.24
+matplotlib>=3.8
+tensorboard>=2.15

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>EMNIST – Local Digit Tester</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0b0c10;--panel:#111317;--fg:#eaf0ff;--muted:#9fb2d2;--accent:#7aa2ff}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui}
+  .wrap{max-width:960px;margin:32px auto;padding:0 16px}
+  .card{background:var(--panel);border:1px solid #1b1e27;border-radius:18px;padding:18px}
+  h1{margin:0 0 10px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .uploader{border:2px dashed #2a3244;border-radius:14px;padding:16px;text-align:center}
+  input[type=file]{display:block;margin:10px auto;color:var(--fg)}
+  .btn{background:var(--accent);border:none;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700}
+  table{width:100%;border-collapse:collapse;margin-top:12px}
+  th,td{border-bottom:1px solid #222632;padding:8px;text-align:left;font-size:14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
+  .thumb{display:flex;flex-direction:column;gap:6px}
+  .thumb img{width:100%;border-radius:10px;border:1px solid #222632;background:#0f1220}
+  .muted{color:var(--muted);font-size:13px}
+  a{color:var(--accent);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Local Digit Tester</h1>
+  <p>(Handwritten Project002: Folder 002)</p>
+  <p class="muted">This page sends a request to the Flask service running <b>in local</b>. Start it with <code>python serve.py</code> in the terminal and paste it here <code>http://127.0.0.1:8000/test</code>’ten aç.</p>
+
+  <div class="row">
+    <div class="card">
+      <h3>Upload (single or multiple)</h3>
+      <div class="uploader">
+        <input id="fileInput" type="file" accept="image/*" multiple webkitdirectory />
+        <button id="btnPredict" class="btn">Predict</button>
+        <div class="muted" style="margin-top:6px">You can select multiple files or use the “folder upload” feature (webkitdirectory) to select a folder.</div>
+      </div>
+      <div id="resultWrap" style="margin-top:14px;display:none">
+        <h3>Results</h3>
+        <table id="resultTable">
+          <thead><tr><th>File</th><th>Pred</th><th>Conf.</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Previews</h3>
+      <div id="previews" class="grid"></div>
+    </div>
+  </div>
+
+  <p class="muted" style="margin-top:14px">Model: <code>emnist_digits_cnn.pt</code> (repo kökünde). Sunucu: <code>serve.py</code>.</p>
+  <p class="muted">For training dashboard <a href="./index.html">index.html</a>.</p>
+</div>
+
+<script>
+const API = "/api/predict"; // aynı origin (serve.py) üzerinden
+
+const fileInput = document.getElementById('fileInput');
+const btn = document.getElementById('btnPredict');
+const previews = document.getElementById('previews');
+const resultWrap = document.getElementById('resultWrap');
+const tbody = document.querySelector('#resultTable tbody');
+
+fileInput.addEventListener('change', ()=>{
+  previews.innerHTML = '';
+  [...fileInput.files].slice(0,50).forEach(f=>{
+    const url = URL.createObjectURL(f);
+    const div = document.createElement('div');
+    div.className = 'thumb';
+    div.innerHTML = `<img src="${url}" alt="${f.name}"><span class="muted">${f.name}</span>`;
+    previews.appendChild(div);
+  });
+});
+
+btn.addEventListener('click', async ()=>{
+  if(!fileInput.files.length){ alert('Lütfen 1+ görsel seç.'); return; }
+  btn.disabled = true; btn.textContent = 'Predicting...';
+  tbody.innerHTML = '';
+  const fd = new FormData();
+  [...fileInput.files].forEach(f=> fd.append('files', f, f.name));
+  try{
+    const res = await fetch(API, { method:'POST', body: fd });
+    const js = await res.json();
+    if(js.error){ alert(js.error); return; }
+    js.results.forEach(r=>{
+      const tr = document.createElement('tr');
+      const conf = r.confidence != null ? (r.confidence*100).toFixed(2)+'%' : '-';
+      tr.innerHTML = `<td>${r.file || '-'}</td><td><b>${r.pred ?? '-'}</b></td><td>${conf}</td>`;
+      tbody.appendChild(tr);
+    });
+    resultWrap.style.display = 'block';
+  }catch(e){
+    console.error(e);
+    alert('The request failed. Is the server running?(python serve.py)');
+  }finally{
+    btn.disabled = false; btn.textContent = 'Predict';
+  }
+});
+</script>
+</body>
+</html>
