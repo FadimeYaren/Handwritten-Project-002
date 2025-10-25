@@ -11,7 +11,7 @@ from PIL import Image
 # ---- Konfig ----
 MEAN, STD = 0.1307, 0.3081
 ROOT = Path(__file__).parent.resolve()
-SITE_DIR = ROOT / "site"
+SITE_DIR = ROOT
 WEIGHTS = ROOT / "emnist_digits_cnn.pt"
 
 app = Flask(__name__, static_folder=str(SITE_DIR), static_url_path="")
